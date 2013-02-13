@@ -190,6 +190,9 @@ static struct clkctl_l2_speed l2_freq_tbl_v2[] = {
 	[17] = {1296000,  1, 0x18, 1200000, 1225000, 3},
 	[18] = {1350000,  1, 0x19, 1200000, 1225000, 3},
 	[19] = {1404000,  1, 0x1A, 1200000, 1250000, 3},
+	[20] = {1458000,  1, 0x1B, 1200000, 1250000, 4},
+	[21] = {1512000,  1, 0x1C, 1200000, 1275000, 4},
+	[22] = {1566000,  1, 0x1D, 1200000, 1275000, 4},
 };
 
 #define L2(x) (&l2_freq_tbl_v2[(x)])
@@ -1012,7 +1015,7 @@ static __init struct clkctl_acpu_speed *select_freq_plan(void)
 		pvs = (pte_efuse >> 13) & 0x7;
 
 	if (speed_bin == 0x2) {
-		max_khz = 1674000;
+		max_khz = 1836000;
 		switch (pvs) {
 #ifdef CONFIG_MSM8X60_CLOCK_FREQTBL_NO_SLOW
 		case 0x7:
