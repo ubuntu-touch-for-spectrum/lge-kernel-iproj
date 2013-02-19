@@ -108,8 +108,6 @@ struct msm_spm_platform_data {
 int msm_spm_set_low_power_mode(unsigned int mode, bool notify_rpm);
 int msm_spm_set_vdd(unsigned int cpu, unsigned int vlevel);
 void msm_spm_reinit(void);
-void msm_spm_allow_x_cpu_set_vdd(bool allowed);
-int get_msm_spm_set_vdd_x_cpu_allowed(void);
 int msm_spm_init(struct msm_spm_platform_data *data, int nr_devs);
 int msm_spm_turn_on_cpu_rail(unsigned int cpu);
 
@@ -141,11 +139,6 @@ static inline int msm_spm_set_vdd(unsigned int cpu, unsigned int vlevel)
 }
 
 static inline void msm_spm_reinit(void)
-{
-	/* empty */
-}
-
-static inline void msm_spm_allow_x_cpu_set_vdd(bool allowed)
 {
 	/* empty */
 }
