@@ -216,7 +216,6 @@ static struct clkctl_acpu_speed acpu_freq_tbl_1188mhz[] = {
   { {0, 0}, 0 },
 };
 
-#ifndef CONFIG_MSM8X60_CLOCK_FREQTBL_NO_SLOW
 /* SCPLL frequencies = 2 * 27 MHz * L_VAL */
 static struct clkctl_acpu_speed acpu_freq_tbl_1512mhz_slow[] = {
   { {1, 1},  192000,  ACPU_PLL_8, 3, 1, 0, 0,    L2(1),   800000, 0x03006000},
@@ -246,7 +245,6 @@ static struct clkctl_acpu_speed acpu_freq_tbl_1512mhz_slow[] = {
   { {1, 1}, 1512000,  ACPU_SCPLL, 0, 0, 1, 0x1C, L2(19), 1225000, 0x03006000},
   { {0, 0}, 0 },
 };
-#endif
 
 /* SCPLL frequencies = 2 * 27 MHz * L_VAL */
 static struct clkctl_acpu_speed acpu_freq_tbl_1512mhz_nom[] = {
@@ -999,16 +997,19 @@ static __init struct clkctl_acpu_speed *select_freq_plan(void)
 	if (pvs == 0x7)
 		pvs = (pte_efuse >> 13) & 0x7;
 
+#ifdef CONFIG_MSM8X60_CLOCK_FREQTBL_FORCE_1674
+	/* Force 1512MHz devices to use 1674MHz tables */
+	if (speed_bin == 0x1)
+		speed_bin = 0x2;
+#endif
+#ifdef CONFIG_MSM8X60_CLOCK_FREQTBL_NO_SLOW
+	/* Force usage of only nom and fast tables */
+	if (pvs != 0x1 && pvs != 0x3)
+		pvs = 0x1;
+#endif
+
 	if (speed_bin == 0x2) {
 		switch (pvs) {
-#ifdef CONFIG_MSM8X60_CLOCK_FREQTBL_NO_SLOW
-		case 0x7:
-		case 0x4:
-		case 0x0:
-			acpu_freq_tbl = acpu_freq_tbl_1674mhz_nom;
-			pr_info("ACPU PVS: Nominal (forced)\n");
-			break;
-#else
 		case 0x7:
 		case 0x4:
 			acpu_freq_tbl = acpu_freq_tbl_1674mhz_slower;
@@ -1018,7 +1019,6 @@ static __init struct clkctl_acpu_speed *select_freq_plan(void)
 			acpu_freq_tbl = acpu_freq_tbl_1674mhz_slow;
 			pr_info("ACPU PVS: Slow\n");
 			break;
-#endif
 		case 0x1:
 			acpu_freq_tbl = acpu_freq_tbl_1674mhz_nom;
 			pr_info("ACPU PVS: Nominal\n");
@@ -1028,30 +1028,17 @@ static __init struct clkctl_acpu_speed *select_freq_plan(void)
 			pr_info("ACPU PVS: Fast\n");
 			break;
 		default:
-#ifdef CONFIG_MSM8X60_CLOCK_FREQTBL_NO_SLOW
-			acpu_freq_tbl = acpu_freq_tbl_1674mhz_nom;
-			pr_warn("ACPU PVS: Unknown. Defaulting to nominal.\n");
-#else
 			acpu_freq_tbl = acpu_freq_tbl_1674mhz_slower;
 			pr_warn("ACPU PVS: Unknown. Defaulting to slower.\n");
-#endif
 			break;
 		}
 	} else if (speed_bin == 0x1) {
 		switch (pvs) {
-#ifdef CONFIG_MSM8X60_CLOCK_FREQTBL_NO_SLOW
-		case 0x0:
-		case 0x7:
-			acpu_freq_tbl = acpu_freq_tbl_1512mhz_nom;
-			pr_info("ACPU PVS: Nominal (forced)\n");
-			break;
-#else
 		case 0x0:
 		case 0x7:
 			acpu_freq_tbl = acpu_freq_tbl_1512mhz_slow;
 			pr_info("ACPU PVS: Slow\n");
 			break;
-#endif
 		case 0x1:
 			acpu_freq_tbl = acpu_freq_tbl_1512mhz_nom;
 			pr_info("ACPU PVS: Nominal\n");
@@ -1061,13 +1048,8 @@ static __init struct clkctl_acpu_speed *select_freq_plan(void)
 			pr_info("ACPU PVS: Fast\n");
 			break;
 		default:
-#ifdef CONFIG_MSM8X60_CLOCK_FREQTBL_NO_SLOW
-			acpu_freq_tbl = acpu_freq_tbl_1512mhz_nom;
-			pr_warn("ACPU PVS: Unknown. Defaulting to nominal.\n");
-#else
 			acpu_freq_tbl = acpu_freq_tbl_1512mhz_slow;
 			pr_warn("ACPU PVS: Unknown. Defaulting to slow.\n");
-#endif
 			break;
 		}
 	} else {
